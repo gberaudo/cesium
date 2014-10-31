@@ -4,6 +4,7 @@ define([
         'Cesium/Core/formatError',
         'Cesium/Core/getFilenameFromUri',
         'Cesium/Core/queryToObject',
+        'Cesium/Core/Cartesian3',
         'Cesium/DataSources/CzmlDataSource',
         'Cesium/DataSources/GeoJsonDataSource',
         'Cesium/Scene/TileMapServiceImageryProvider',
@@ -17,6 +18,7 @@ define([
         formatError,
         getFilenameFromUri,
         queryToObject,
+        Cartesian3,
         CzmlDataSource,
         GeoJsonDataSource,
         TileMapServiceImageryProvider,
@@ -79,6 +81,15 @@ define([
     });
 
     var scene = viewer.scene;
+//    scene.camera.flyTo({
+//              'destination': Cartesian3.fromDegrees(7.140908, 46.203627, 3000),
+//              'duration': 0
+//              });
+    scene.camera.lookAt(
+        Cartesian3.fromDegrees(7.140908, 46.203627, 3000),
+        Cartesian3.ZERO,
+        Cartesian3.UNIT_Z);
+
     var context = scene.context;
     if (endUserOptions.debug) {
         context.validateShaderProgram = true;
