@@ -165,6 +165,7 @@ define([
         this._tileHeight = defaultValue(options.tileHeight, 256);
         this._minimumLevel = defaultValue(options.minimumLevel, 0);
         this._maximumLevel = options.maximumLevel; // undefined means no limit
+        this._minimumRetrievingLevel = defaultValue(options.minimumRetrievingLevel, 0);
 
         this._rectangle = defaultValue(options.rectangle, Rectangle.MAX_VALUE);
         this._tilingScheme = defined(options.tilingScheme) ? options.tilingScheme : new GeographicTilingScheme({ ellipsoid : options.ellipsoid });
@@ -424,6 +425,16 @@ define([
         return undefined;
     };
 
+    var transparentCanvas = function() {
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext('2d');
+      ctx.width = 256;
+      ctx.height = 256;
+      ctx.fillStyle = 'rgba(255, 0, 0, 0)';
+      ctx.fillRect(0, 0, 255, 255);
+      return canvas;
+    }();
+
     /**
      * Requests the image for a given tile.  This function should
      * not be called before {@link WebMapServiceImageryProvider#ready} returns true.
@@ -444,6 +455,10 @@ define([
             throw new DeveloperError('requestImage must not be called before the imagery provider is ready.');
         }
         //>>includeEnd('debug');
+
+        if (level < this._minimumRetrievingLevel) {
+          return transparentCanvas;
+        }
 
         var url = buildImageUrl(this, x, y, level);
         return ImageryProvider.loadImage(this, url);
