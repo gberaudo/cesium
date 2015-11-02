@@ -376,6 +376,9 @@ define([
             }
         }
 
+        // Compute camera height once
+        cameraHeight = frameState.camera.positionCartographic.height;
+
         // Traverse the tiles in breadth-first order.
         // This ordering allows us to load bigger, lower-detail tiles before smaller, higher-detail ones.
         // This maximizes the average detail across the scene and results in fewer sharp transitions
@@ -444,7 +447,7 @@ define([
     var mindist = parseInt(defaultValue(params['mindist'], '5000'), 10);
     var maxdist = parseInt(defaultValue(params['maxdist'], '10000'), 10);
     var shouldCut = defined(params['mindist']) && defined(params['maxdist']);
-    var a = (mindist == maxdist) ? 1 : - 1 / (maxdist - mindist);
+    var cameraHeight;
 
     function screenSpaceError(primitive, frameState, tile) {
         if (frameState.mode === SceneMode.SCENE2D) {
@@ -469,10 +472,14 @@ define([
           return original;
         }
 
-        if (distance < maxdist) {
-          if (distance < mindist) {
+        // TODO: should be optimized out
+        var min = Math.min(mindist, 0.9 * cameraHeight);
+        var max = Math.max(maxdist, 1.2 * cameraHeight);
+        if (distance < max) {
+          if (distance < min) {
             return original;
           } else {
+            var a = (min == max) ? 1 : - 1 / (max - min);
             return (a * distance + 2) * original;
           }
         } else {
