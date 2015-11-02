@@ -433,6 +433,19 @@ define([
         }
     }
 
+    var params = {};
+    location.search.substr(1).split("&").reduce(function(previous, current) {
+      var splitted = current.split("=");
+      if (splitted.length === 2) {
+        params[splitted[0]] = splitted[1];
+      }
+    });
+
+    var mindist = parseInt(defaultValue(params['mindist'], '5000'), 10);
+    var maxdist = parseInt(defaultValue(params['maxdist'], '10000'), 10);
+    var shouldCut = defined(params['mindist']) && defined(params['maxdist']);
+    var a = (mindist == maxdist) ? 1 : - 1 / (maxdist - mindist);
+
     function screenSpaceError(primitive, frameState, tile) {
         if (frameState.mode === SceneMode.SCENE2D) {
             return screenSpaceError2D(primitive, frameState, tile);
@@ -450,7 +463,21 @@ define([
         var fovy = frustum.fovy;
 
         // PERFORMANCE_IDEA: factor out stuff that's constant across tiles.
-        return (maxGeometricError * height) / (2 * distance * Math.tan(0.5 * fovy));
+        var original = (maxGeometricError * height) / (2 * distance * Math.tan(0.5 * fovy));
+
+        if (!shouldCut) {
+          return original;
+        }
+
+        if (distance < maxdist) {
+          if (distance < mindist) {
+            return original;
+          } else {
+            return (a * distance + 2) * original;
+          }
+        } else {
+          return 0; // Consider there is no SSE, so use this tile instead of refining
+        }
     }
 
     function screenSpaceError2D(primitive, frameState, tile) {
