@@ -446,7 +446,7 @@ define([
 
     var mindist = parseInt(defaultValue(params['mindist'], '5000'), 10);
     var maxdist = parseInt(defaultValue(params['maxdist'], '10000'), 10);
-    var shouldCut = defined(params['mindist']) && defined(params['maxdist']);
+    var shouldCut = !params['nocut'];
     var cameraHeight;
 
     function screenSpaceError(primitive, frameState, tile) {
