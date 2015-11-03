@@ -446,7 +446,10 @@ define([
 
     var mindist = parseInt(defaultValue(params['mindist'], '5000'), 10);
     var maxdist = parseInt(defaultValue(params['maxdist'], '10000'), 10);
+    var mincamfactor = parseFloat(defaultValue(params['mincamfactor'], '0.9'));
+    var maxcamfactor = parseFloat(defaultValue(params['maxcamfactor'], '1.2'));
     var shouldCut = !params['nocut'];
+    var noheight = !!params['noheight'];
     var cameraHeight;
 
     function screenSpaceError(primitive, frameState, tile) {
@@ -473,8 +476,13 @@ define([
         }
 
         // TODO: should be optimized out
-        var min = Math.min(mindist, 0.9 * cameraHeight);
-        var max = Math.max(maxdist, 1.2 * cameraHeight);
+        var min = mindist;
+        var max = maxdist;
+        if (!noheight) {
+          min = Math.min(mindist, mincamfactor * cameraHeight);
+          max = Math.max(maxdist, maxcamfactor * cameraHeight);
+        }
+
         if (distance < max) {
           if (distance < min) {
             return original;
